@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP SOAP Client - RES_POSITION_UPDATE</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+        @media (max-width: 768px) {
+            .content { grid-template-columns: 1fr; }
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section-header h2 {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+            flex: 1;
+        }
+        .collapse-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .collapse-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease;
+            max-height: 5000px;
+            opacity: 1;
+        }
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: monospace;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .response-section {
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .response-section h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .response-content {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .add-row-btn {
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .add-row-btn:hover { background: #218838; }
+        .position-item {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+        .position-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .remove-btn:hover { background: #c82333; }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #555;
+        }
+        .phone-interface {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: #f9f9f9;
+            text-align: center;
+        }
+        .geolocation {
+            margin-top: 20px;
+        }
+        #send-location {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #send-location:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 SAP SOAP Client</h1>
+            <p>/SCMTMS/RES_POSITION_UPDATE - Web Service Tester</p>
+        </div>
+        
+        <div class="content">
+            <!-- Left Column: Input Form -->
+            <div class="form-section">
+                <div class="section-header" onclick="toggleSection('config-section', this)">
+                    <h2>Configuration</h2>
+                    <button class="collapse-toggle" onclick="event.stopPropagation()">▼</button>
+                </div>
+                
+                <div id="config-section" class="collapsible-content">
+                    <div class="info-box">
+                        💡 Enter your SAP system details below. UUID fields are automatically Base64-encoded.
+                    </div>
+
+                    <div class="form-group">
+                        <label>SAP System URL *</label>
+                        <input type="text" id="sapUrl" placeholder="https://sap-host:8443/sap/bc/srt/wsocdata/sap/..." value="https://localhost:8443/sap/bc/srt/wsocdata/sap/ZYTM_UPDATE_RES_POSITION">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Username *</label>
+                        <input type="text" id="username" placeholder="SAP Username">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password *</label>
+                        <input type="password" id="password" placeholder="SAP Password">
+                    </div>
+
+                    <div class="button-group" style="margin-bottom: 20px;">
+                        <button class="btn-primary" onclick="saveCredentials()" style="background: #28a745;">Save Credentials</button>
+                        <button class="btn-secondary" onclick="clearCredentials()">Clear Saved</button>
+                    </div>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <h3 style="font-size: 14px; margin-bottom: 15px; color: #333;">🌐 PC Miler API Configuration</h3>
+
+                    <div class="form-group">
+                        <label>PC Miler API Key *</label>
+                        <input type="text" id="pcmilerApiKey" placeholder="91F47AE69A97614985E5BE2CBC1547BD">
+                    </div>
+
+                    <div class="form-group">
+                        <label>PC Miler API Endpoint *</label>
+                        <input type="text" id="pcmilerEndpoint" placeholder="https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/locations" value="https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/locations">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="savePcMilerConfig()" style="background: #007bff;">Save PC Miler Config</button>
+                    </div>
+                </div>
+
+                <div class="section-header" onclick="toggleSection('resources-section', this)">
+                    <h2>📦 Saved Resources</h2>
+                    <button class="collapse-toggle" onclick="event.stopPropagation()">▼</button>
+                </div>
+
+                <div id="resources-section" class="collapsible-content">
+                    <div class="info-box" style="margin-bottom: 15px;">
+                        💾 Manage your resources (ID & Name). Add resources here, then select them in Position Data section.
+                    </div>
+
+                    <!-- Add New Resource Form -->
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd;">
+                        <h3 style="font-size: 14px; margin-bottom: 10px; color: #333;">➕ Add New Resource</h3>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Resource ID *</label>
+                                <input type="text" id="newResourceId" placeholder="005056043C401EEBA0CAB30F10DB978E" maxlength="32">
+                            </div>
+                            <div class="form-group">
+                                <label>Resource Name *</label>
+                                <input type="text" id="newResourceName" placeholder="TM2FTL-00" maxlength="40">
+                            </div>
+                        </div>
+                        <button class="add-row-btn" style="background: #28a745;" onclick="addNewResource()">💾 Save New Resource</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Manage Saved Resources</label>
+                        <select id="manageSavedResourcesSelect" style="width: 100%; margin-bottom: 10px;">
+                            <option value="">-- Choose a resource to delete --</option>
+                        </select>
+                        <button class="btn-secondary" onclick="deleteManageResource()" style="width: 100%;">Delete Selected Resource</button>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 20px; font-size: 18px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px;">Position Data</h2>
+
+                <div id="positionsList"></div>
+
+                <button class="add-row-btn" onclick="addPositionRow()">+ Add Position</button>
+
+                <div class="button-group" style="margin-top: 30px;">
+                    <button class="btn-primary" onclick="sendSoapRequest()">Send Request</button>
+                    <button class="btn-secondary" onclick="clearForm()">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Right Column: Response -->
+            <div class="response-section">
+                <h2>Response</h2>
+                <div id="statusIndicator" style="display:none;" class="status-indicator status-pending">Waiting for response...</div>
+                <div id="responseContent" class="response-content">Ready to send request...</div>
+            </div>
+        </div>
+
+        <!-- Debug Section for Geocoding -->
+        <div style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 10px; border: 2px solid #ddd;">
+            <h2 style="font-size: 16px; margin-bottom: 15px; color: #333;">🔍 Geocoding Debug Info</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3 style="font-size: 13px; margin-bottom: 10px; color: #666;">API Request URL</h3>
+                    <div id="debugUrl" style="background: white; border: 1px solid #ddd; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 11px; line-height: 1.4; word-break: break-all; max-height: 200px; overflow-y: auto; color: #333;">Not sent yet...</div>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; margin-bottom: 10px; color: #666;">API Response</h3>
+                    <div id="debugResponse" style="background: white; border: 1px solid #ddd; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 11px; line-height: 1.4; word-break: break-all; max-height: 200px; overflow-y: auto; color: #333;">Waiting...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize with one empty position row and load saved credentials
+        window.addEventListener('load', async () => {
+            addPositionRow();
+            await loadCredentials();
+            loadPcMilerConfig();
+            loadSavedResourcesList();
+        });
+
+        function toggleSection(sectionId, headerElement) {
+            const section = document.getElementById(sectionId);
+            const button = headerElement.querySelector('.collapse-toggle');
+            
+            section.classList.toggle('collapsed');
+            button.classList.toggle('collapsed');
+        }
+
+        // Saved Resources Functions
+        function loadSavedResourcesList() {
+            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
+            const select = document.getElementById('manageSavedResourcesSelect');
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">-- Choose a resource to delete --</option>';
+            
+            savedResources.forEach((resource, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${resource.resourceName} (${resource.resourceId})`;
+                select.appendChild(option);
+            });
+            
+            // Also update all position dropdowns
+            document.querySelectorAll('.saved-resource-select').forEach(dropdown => {
+                populateResourceDropdownElement(dropdown);
+            });
+        }
+
+        function populateResourceDropdown(positionId) {
+            const positionItem = document.getElementById(positionId);
+            const select = positionItem.querySelector('.saved-resource-select');
+            populateResourceDropdownElement(select);
+        }
+
+        function populateResourceDropdownElement(select) {
+            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
+            
+            // Clear and rebuild
+            select.innerHTML = '<option value="">-- Choose a saved resource --</option>';
+            
+            savedResources.forEach((resource, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${resource.resourceName} (${resource.resourceId})`;
+                select.appendChild(option);
+            });
+        }
+
+        function loadResourceIntoPosition(positionId) {
+            const positionItem = document.getElementById(positionId);
+            const select = positionItem.querySelector('.saved-resource-select');
+            const index = select.value;
+            
+            if (!index) return;
+            
+            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
+            const resource = savedResources[index];
+            
+            if (!resource) {
+                alert('Resource not found');
+                return;
+            }
+            
+            // Populate Resource ID and Name
+            positionItem.querySelector('.resource-id').value = resource.resourceId || '';
+            positionItem.querySelector('.resource-name').value = resource.resourceName || '';
+            
+            // Update timestamp to current time
+            updateTimestamp(positionId);
+        }
+
+        function updateTimestamp(positionId) {
+            const positionItem = document.getElementById(positionId);
+            positionItem.querySelector('.timestamp').value = getTimestamp();
+        }
+
+        function addNewResource() {
+            const resourceData = {
+                resourceId: document.getElementById('newResourceId').value.trim(),
+                resourceName: document.getElementById('newResourceName').value.trim()
+            };
+            
+            if (!resourceData.resourceId || !resourceData.resourceName) {
+                alert('Please fill in both Resource ID and Resource Name');
+                return;
+            }
+            
+            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
+            savedResources.push(resourceData);
+            localStorage.setItem('savedResources', JSON.stringify(savedResources));
+            
+            // Clear the form
+            document.getElementById('newResourceId').value = '';
+            document.getElementById('newResourceName').value = '';
+            
+            loadSavedResourcesList();
+            alert(`✓ Resource "${resourceData.resourceName}" saved successfully!`);
+        }
+
+        function deleteManageResource() {
+            const select = document.getElementById('manageSavedResourcesSelect');
+            const index = select.value;
+            
+            if (!index) {
+                alert('Please select a resource to delete');
+                return;
+            }
+            
+            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
+            const resource = savedResources[index];
+            
+            if (!confirm(`Delete resource "${resource.resourceName}"?`)) {
+                return;
+            }
+            
+            savedResources.splice(index, 1);
+            localStorage.setItem('savedResources', JSON.stringify(savedResources));
+            
+            loadSavedResourcesList();
+            alert('✓ Resource deleted successfully!');
+        }
+
+        async function saveCredentials() {
+            const sapUrl = document.getElementById('sapUrl').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!sapUrl || !username || !password) {
+                alert('Please fill in all credential fields: URL, Username, and Password');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/credentials/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sapUrl: sapUrl,
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('✓ Credentials saved successfully!');
+                } else {
+                    alert('Error saving credentials: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error saving credentials: ' + error.message);
+            }
+        }
+
+        async function loadCredentials() {
+            try {
+                console.log('Attempting to load credentials...');
+                const response = await fetch('/api/credentials/load');
+                console.log('Response received:', response.status);
+                
+                const result = await response.json();
+                console.log('Result:', result);
+
+                if (result.success && result.data) {
+                    document.getElementById('sapUrl').value = result.data.sapUrl || '';
+                    document.getElementById('username').value = result.data.username || '';
+                    document.getElementById('password').value = result.data.password || '';
+                    console.log('✓ Credentials loaded from file');
+                    console.log('Loaded values - URL:', result.data.sapUrl, 'Username:', result.data.username);
+                } else {
+                    console.log('No credentials data found or success=false');
+                }
+            } catch (error) {
+                console.error('Error loading credentials:', error);
+                console.log('No saved credentials found or error loading: ' + error.message);
+            }
+        }
+
+        async function clearCredentials() {
+            if (confirm('Clear all saved credentials?')) {
+                try {
+                    const response = await fetch('/api/credentials/clear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('sapUrl').value = '';
+                        document.getElementById('username').value = '';
+                        document.getElementById('password').value = '';
+                        alert('✓ Saved credentials cleared!');
+                    } else {
+                        alert('Error clearing credentials: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Error clearing credentials: ' + error.message);
+                }
+            }
+        }
+
+        // PC Miler Configuration Functions
+        function savePcMilerConfig() {
+            const apiKey = document.getElementById('pcmilerApiKey').value.trim();
+            const endpoint = document.getElementById('pcmilerEndpoint').value.trim();
+
+            if (!apiKey || !endpoint) {
+                alert('Please fill in both PC Miler API Key and API Endpoint');
+                return;
+            }
+
+            try {
+                localStorage.setItem('pcmilerApiKey', apiKey);
+                localStorage.setItem('pcmilerEndpoint', endpoint);
+                alert('✓ PC Miler configuration saved successfully!');
+                console.log('PC Miler config saved - Key:', apiKey.substring(0, 8) + '...', 'Endpoint:', endpoint);
+            } catch (error) {
+                alert('Error saving PC Miler config: ' + error.message);
+            }
+        }
+
+        function loadPcMilerConfig() {
+            const savedApiKey = localStorage.getItem('pcmilerApiKey');
+            const savedEndpoint = localStorage.getItem('pcmilerEndpoint');
+
+            if (savedApiKey) {
+                document.getElementById('pcmilerApiKey').value = savedApiKey;
+                console.log('✓ PC Miler API Key loaded from localStorage');
+            } else {
+                // Set default endpoint
+                document.getElementById('pcmilerApiKey').value = '91F47AE69A97614985E5BE2CBC1547BD';
+            }
+
+            if (savedEndpoint) {
+                document.getElementById('pcmilerEndpoint').value = savedEndpoint;
+                console.log('✓ PC Miler API Endpoint loaded from localStorage');
+            } else {
+                // Set default endpoint
+                document.getElementById('pcmilerEndpoint').value = 'https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/locations';
+            }
+        }
+
+        function getPcMilerConfig() {
+            const apiKey = localStorage.getItem('pcmilerApiKey') || '91F47AE69A97614985E5BE2CBC1547BD';
+            const endpoint = localStorage.getItem('pcmilerEndpoint') || 'https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/locations';
+            return { apiKey, endpoint };
+        }
+
+        function addPositionRow() {
+            const positions = document.getElementById('positionsList');
+            const rowId = 'pos_' + Date.now();
+            
+            const html = `
+                <div class="position-item" id="${rowId}">
+                    <div class="position-item-header">
+                        <strong>Position #${positions.children.length + 1}</strong>
+                        <button class="remove-btn" onclick="removePosition('${rowId}')">Remove</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Resource *</label>
+                        <select class="saved-resource-select" onchange="loadResourceIntoPosition('${rowId}')" style="width: 100%;">
+                            <option value="">-- Choose a saved resource --</option>
+                        </select>
+                    </div>
+                    <input type="hidden" class="resource-id" value="">
+                    <input type="hidden" class="resource-name" value="">
+                    <input type="hidden" class="timestamp" value="${getTimestamp()}">
+                    <div class="form-group">
+                        <label>Street Address</label>
+                        <input type="text" class="address-street" placeholder="e.g., 1 Independence Way">
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" class="address-city" placeholder="e.g., Princeton">
+                        </div>
+                        <div class="form-group">
+                            <label>State/Province</label>
+                            <input type="text" class="address-state" placeholder="e.g., NJ">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Postcode</label>
+                            <input type="text" class="address-postcode" placeholder="e.g., 08540">
+                        </div>
+                        <div class="form-group">
+                            <label>Country</label>
+                            <input type="text" class="address-country" placeholder="e.g., US" value="US">
+                        </div>
+                    </div>
+                    <button type="button" class="add-row-btn" style="background: #667eea; margin-bottom: 15px;" onclick="geocodeAddress('${rowId}')">Get Coordinates from Address</button>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Longitude *</label>
+                            <input type="number" class="longitude" placeholder="9.278645" step="0.000001">
+                        </div>
+                        <div class="form-group">
+                            <label>Latitude *</label>
+                            <input type="number" class="latitude" placeholder="53.199566" step="0.000001">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            positions.insertAdjacentHTML('beforeend', html);
+            
+            // Populate the resource dropdown in this position
+            populateResourceDropdown(rowId);
+            
+            // Update timestamp to current time
+            updateTimestamp(rowId);
+        }
+
+        function removePosition(rowId) {
+            const element = document.getElementById(rowId);
+            if (document.querySelectorAll('.position-item').length > 1) {
+                element.remove();
+            } else {
+                alert('At least one position is required');
+            }
+        }
+
+        function getTimestamp() {
+            const now = new Date();
+            return now.toISOString()
+                .replace(/[-T:.Z]/g, '')
+                .substring(0, 14);
+        }
+
+        async function geocodeAddress(positionId) {
+            const positionItem = document.getElementById(positionId);
+            const street = positionItem.querySelector('.address-street').value.trim();
+            const city = positionItem.querySelector('.address-city').value.trim();
+            const state = positionItem.querySelector('.address-state').value.trim();
+            const postcode = positionItem.querySelector('.address-postcode').value.trim();
+            const country = positionItem.querySelector('.address-country').value.trim() || 'US';
+            
+            if (!street || !city || !state) {
+                alert('Please enter at least: Street, City, and State');
+                return;
+            }
+
+            try {
+                // Get PC Miler configuration from localStorage
+                const config = getPcMilerConfig();
+                const apiKey = config.apiKey;
+                const endpoint = config.endpoint;
+                
+                const params = new URLSearchParams({
+                    street: street,
+                    city: city,
+                    state: state,
+                    country: country,
+                    postcode: postcode,
+                    region: 'NA',
+                    dataset: 'Current'
+                });
+                
+                // Only add postcodeFilter for US addresses
+                if (country.toLowerCase() === 'us') {
+                    params.append('postcodeFilter', 'us');
+                }
+
+                const url = `${endpoint}?${params}`;
+                
+                // Display the request URL in debug section
+                document.getElementById('debugUrl').textContent = url;
+                document.getElementById('debugResponse').textContent = 'Loading...';
+                
+                console.log('Geocoding request URL:', url);
+                console.log('Using PC Miler API Key:', apiKey.substring(0, 8) + '...');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-type': 'application/json',
+                        'Authorization': apiKey
+                    }
+                });
+                const responseText = await response.text();
+                
+                // Display the raw response in debug section
+                document.getElementById('debugResponse').textContent = responseText || '(Empty response)';
+                console.log('Raw response:', responseText);
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}: ${responseText}`);
+                }
+                
+                if (!responseText || responseText.trim() === '') {
+                    throw new Error('Empty response from API');
+                }
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    throw new Error('Invalid JSON response from API: ' + responseText.substring(0, 200));
+                }
+                
+                if (Array.isArray(result) && result.length > 0) {
+                    const location = result[0];
+                    const lat = parseFloat(location.Coords.Lat);
+                    const lon = parseFloat(location.Coords.Lon);
+                    
+                    positionItem.querySelector('.latitude').value = lat;
+                    positionItem.querySelector('.longitude').value = lon;
+                    console.log(`✓ Location found! Latitude: ${lat}, Longitude: ${lon}, Address: ${location.Address.StreetAddress}, ${location.Address.City}, ${location.Address.State}`);
+                } else if (result && result.Locations && result.Locations.length > 0) {
+                    // Handle legacy response format
+                    const location = result.Locations[0];
+                    const lat = location.Latitude;
+                    const lon = location.Longitude;
+                    
+                    positionItem.querySelector('.latitude').value = lat;
+                    positionItem.querySelector('.longitude').value = lon;
+                    alert(`✓ Location found!\nLatitude: ${lat}\nLongitude: ${lon}`);
+                } else {
+                    alert('Address not found. Please verify the address details.');
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                document.getElementById('debugResponse').textContent = 'ERROR: ' + error.message;
+                alert('Error geocoding address: ' + error.message);
+            }
+        }
+
+        function hexToBase64(hexString) {
+            if (!hexString || hexString.length !== 32) {
+                throw new Error('UUID must be 32 hex characters');
+            }
+            let bytes = [];
+            for (let i = 0; i < hexString.length; i += 2) {
+                bytes.push(parseInt(hexString.substr(i, 2), 16));
+            }
+            return btoa(String.fromCharCode.apply(null, bytes));
+        }
+
+        function collectPositionData() {
+            const positions = [];
+            document.querySelectorAll('.position-item').forEach((item, index) => {
+                const resourceId = item.querySelector('.resource-id').value.trim();
+                const resourceName = item.querySelector('.resource-name').value.trim();
+                const longitude = item.querySelector('.longitude').value;
+                const latitude = item.querySelector('.latitude').value;
+                
+                // Update timestamp to current runtime value
+                const timestamp = getTimestamp();
+                item.querySelector('.timestamp').value = timestamp;
+
+                if (!resourceId || !timestamp || !resourceName || !longitude || !latitude) {
+                    throw new Error(`Position ${index + 1}: All fields are required`);
+                }
+
+                positions.push({
+                    resourceId: hexToBase64(resourceId),
+                    timestamp: parseInt(timestamp),
+                    resourceName: resourceName,
+                    longitude: parseFloat(longitude),
+                    latitude: parseFloat(latitude)
+                });
+            });
+            return positions;
+        }
+
+        function buildSoapRequest(positions) {
+            let items = '';
+            positions.forEach(pos => {
+                items += `
+        <item>
+            <RESOURCE_ID>${pos.resourceId}</RESOURCE_ID>
+            <TIMESTAMP>${pos.timestamp}</TIMESTAMP>
+            <RESOURCE_NAME>${pos.resourceName}</RESOURCE_NAME>
+            <LONGITUDE>${pos.longitude}</LONGITUDE>
+            <LATITUDE>${pos.latitude}</LATITUDE>
+        </item>`;
+            });
+
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <urn:_-SCMTMS_-RES_POSITION_UPDATE>
+            <IT_RESOURCE_POSITIONS>
+${items}
+            </IT_RESOURCE_POSITIONS>
+        </urn:_-SCMTMS_-RES_POSITION_UPDATE>
+    </soapenv:Body>
+</soapenv:Envelope>`;
+        }
+
+        async function sendSoapRequest() {
+            const sapUrl = document.getElementById('sapUrl').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const statusEl = document.getElementById('statusIndicator');
+            const responseEl = document.getElementById('responseContent');
+
+            if (!sapUrl || !username || !password) {
+                showError('SAP URL, Username, and Password are required');
+                return;
+            }
+
+            try {
+                const positions = collectPositionData();
+                const soapBody = buildSoapRequest(positions);
+
+                showStatus('pending', 'Sending request...');
+                responseEl.textContent = 'Sending SOAP request to: ' + sapUrl + '\n\nRequest:\n' + soapBody;
+
+                const auth = btoa(username + ':' + password);
+
+                const response = await fetch('/api/soap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: sapUrl,
+                        body: soapBody,
+                        auth: auth
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('success', '✓ Response received');
+                    responseEl.textContent = 'Response:\n\n' + (result.body || result.response);
+                } else {
+                    showError('Error: ' + (result.error || 'Unknown error'));
+                    responseEl.textContent = 'Request: ' + soapBody + '\n\nError:\n' + (result.error || result.response);
+                }
+            } catch (error) {
+                showError(error.message);
+                responseEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function showStatus(type, message) {
+            const statusEl = document.getElementById('statusIndicator');
+            statusEl.textContent = message;
+            statusEl.style.display = 'inline-block';
+            statusEl.className = 'status-indicator status-' + type;
+        }
+
+        function showError(message) {
+            showStatus('error', '✗ ' + message);
+        }
+
+        function clearForm() {
+            if (confirm('Clear all data?')) {
+                document.getElementById('positionsList').innerHTML = '';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('responseContent').textContent = 'Ready to send request...';
+                document.getElementById('statusIndicator').style.display = 'none';
+                addPositionRow();
+            }
+        }
+    </script>
+</body>
+</html>

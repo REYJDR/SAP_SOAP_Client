@@ -1,0 +1,71 @@
+Without SAP Business Technology Platform (BTP) licenses or SAP HANA Spatial Services, you can still integrate third-party GIS services (like HERE, PTV, or ALK PC*MILER) into SAP Transportation Management (TM) by using direct API calls via middleware or custom ABAP development. SAP TM provides an open GIS integration framework designed for this purpose. 
+Here is how to use third-party GIS services without BTP:
+1. Direct Integration via Middleware (Recommended Approach) 
+Instead of routing through SAP BTP, connect your third-party GIS provider directly to your SAP backend. 
+Method: Use SAP Process Integration/Process Orchestration (PI/PO) or SAP Integration Suite to create a bridge between the GIS provider’s API and SAP TM.
+Functionality: This allows for geocoding (converting addresses to latitude/longitude), georouting (calculating distance/duration), and map display.
+Implementation: The GIS provider supplies APIs, which your middleware calls, transforms, and sends to SAP TM via RFC or web services. 
+2. Custom ABAP Development (Direct to Provider) 
+You can directly call web services from within your ABAP environment. 
+Custom Class Development: Create a custom ABAP class by copying the standard GIS connector class (/SCMB/CL_GEOROUTING_CONNECTOR) and modify it to handle the REST/SOAP API calls for your chosen vendor.
+Process Controller Configuration: Use the Process Controller (SPRO) to configure this new method for distance and duration determination.
+Data Transport: Use HTTP client functionality within ABAP (e.g., CL_HTTP_CLIENT) to send request data to the vendor and parse the response. 
+3. Setup Steps in SAP TM (No BTP)
+Define GIS Provider: In SPRO, define your GIS provider (e.g., HERE, PTV) in the "Define GIS Tool" section.
+Establish Connectivity: Configure the necessary TCP/IP connections (SM59) to point directly to the vendor's API endpoints instead of a BTP URL.
+Assign to Means of Transport: In the "Define Means of Transport" customizing, assign the new GIS tool to the relevant transport types, including configuring mapping for speed (low, medium, high) and distances. 
+4. Alternative: Manual or Basic Setup
+If a full integration is too complex, you can operate with limited, non-third-party GIS capabilities: 
+Manual Coordinates: Maintain geo-coordinates for locations directly in the location master data.
+Straight Line Calculation: Utilize SAP’s standard air-line distance calculation (as the crow flies) instead of road-based routing. 
+Summary of Requirements
+Licensing: You must have a direct contract/license with the third-party GIS provider (BYOL - Bring Your Own License).
+API Credentials: You must have the API keys and endpoints from the provider to configure in SAP TM.
+Security: Ensure secure, authenticated connections are configured directly between SAP and the provider's server. 
+
+TM2G97-01
+7,2734 LONG 7.45944444
+51,312.LAT 51.51722222 ,  7.45944444
+
+53.51722222 , 9.59555556
+
+
+1 51.991763, 7.570271
+2 52.436037, 8.059163
+3 52,812839, 8,218465
+4 53.199566, 9.278645
+5 53,383018, 9,597519
+
+/SCMTMS/RES_POSITION_UPDATE
+
+005056043C401EEBA0CAB30F10DB978E
+
+TM2FTL-00
+
+<RESOURCE_ID>005056043C401EEBA0CAB30F10DB978E</RESOURCE_ID>
+               <TIMESTAMP>20260202003807</TIMESTAMP>
+               <RESOURCE_NAME>TM2FTL-00</RESOURCE_NAME>
+               <LONGITUDE>9,278645</LONGITUDE>
+               <LATITUDE>53,199566</LATITUDE>
+               <LOCATION_UUID>01</LOCATION_UUID>
+
+
+               <LONGITUDE>8.059163</LONGITUDE>
+               <LATITUDE>52.436037</LATITUDE>
+
+
+               <LONGITUDE>9.597519</LONGITUDE>
+               <LATITUDE>53.199566</LATITUDE>
+   <LONGITUDE>7.570271</LONGITUDE>
+               <LATITUDE>51.991763</LATITUDE>
+               
+
+
+RESOURCE_ID	1 Types	/SCMTMS/UUID_ID	RAW	16	0	0	Internal Universally Unique Identifier
+TIMESTAMP	1 Types	/SCMTMS/DATETIME	DEC	15	0	0	Date/Time
+.INCLUDE	1 Types	/SCMTMS/S_RES_POSITION_DATA		0	0	0	Resources: Position data
+RESOURCE_NAME	1 Types	/SCMTMS/RES_NAME	CHAR	40	0	0	Resource
+LONGITUDE	1 Types	/SCMTMS/LONGITUDE_DEG	FLTP	16	16	0	Longitude in Degree
+LATITUDE	1 Types	/SCMTMS/LATITUDE_DEG	FLTP	16	16	0	Latitude in Degree
+LOCATION_UUID	1 Types	/SCMTMS/LOCUUID	RAW	16	0	0	Location GUID (004) with Conversion Exit
+______________________________	                                                                                                                                                                                                                                                               	______________________________	____________________________________________________________________________________________________________________________________	______	______	_______.___	____________________________________________________________

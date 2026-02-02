@@ -1,0 +1,205 @@
+# SAP SOAP Client - Windows Package Setup Guide
+
+This package supports two modes:
+- **Standalone EXE** (no installation needed)
+- **Node.js mode** (requires Node.js install)
+
+## What's Included
+
+✅ Complete web application (HTML/CSS/JavaScript)
+✅ Node.js backend server (Express.js)
+✅ Batch launcher script (.bat file)
+✅ PowerShell launcher script (.ps1 file)
+✅ All dependencies configured
+✅ Full documentation
+
+## Getting Started (3 Steps)
+
+### Step 1: Choose Your Mode
+**If your package includes `SAP_SOAP_Client.exe`:**
+- No Node.js installation required
+
+**If your package does NOT include the EXE:**
+1. Visit https://nodejs.org/
+2. Download the LTS version (18.x or 20.x)
+3. Run the installer and follow the prompts
+4. After installation, restart your computer
+
+### Step 2: Extract the Package
+1. Right-click the ZIP file
+2. Select "Extract All..."
+3. Choose a location (e.g., C:\Programs or Desktop)
+4. Wait for extraction to complete
+
+### Step 3: Run the Application
+Choose ONE of these options:
+
+#### Option A: PowerShell (Recommended for Windows 10/11)
+- Double-click `start.ps1`
+- If prompted about execution policy, click "Run Anyway"
+- Browser will open automatically
+
+#### Option B: Batch File
+- Double-click `start.bat`
+- Wait for "Dependencies installed" message
+- Browser will open automatically
+
+#### Option C: Manual (Command Prompt)
+```
+1. Open Command Prompt
+2. Navigate to the folder with "cd C:\path\to\SAP_SOAP_Client"
+3. Run: npm install
+4. Run: npm start
+5. Open http://localhost:3000 in your browser
+```
+
+---
+
+## Configuration
+
+### SAP System Settings
+1. Enter your SAP system URL
+2. Provide your SAP username and password
+3. Click "Save Credentials"
+
+### PC Miler API (for geocoding)
+1. Get your API key from PC Miler
+2. In Configuration section, fill in:
+   - **PC Miler API Key**: Your API key
+   - **PC Miler API Endpoint**: Default is pre-filled
+3. Click "Save PC Miler Config"
+
+---
+
+## First-Time Run
+
+On your first run:
+- The batch/PowerShell script will:
+  - Check for Node.js
+  - Install all dependencies (npm packages)
+  - Start the server
+  - Open your browser
+
+This may take 1-2 minutes on first run.
+
+---
+
+## Troubleshooting
+
+### Issue: "Node.js is not installed"
+**Fix**: Use the standalone package with `SAP_SOAP_Client.exe`, or install Node.js and restart your computer
+
+### Issue: PowerShell won't run the script
+**Fix**: 
+1. Open PowerShell as Administrator
+2. Run: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+3. Type Y and press Enter
+4. Try `start.ps1` again
+
+### Issue: "port is already in use"
+**Fix**: The script will automatically use port 3001, 3002, etc. if 3000 is taken
+
+### Issue: Browser doesn't open
+**Fix**: Manually visit http://localhost:3000
+
+### Issue: npm not found
+**Fix**: Restart your computer after installing Node.js
+
+### Issue: Dependencies install fails
+**Fix**: 
+1. Delete the `node_modules` folder
+2. Run `start.bat` or `start.ps1` again
+3. It will reinstall dependencies
+
+---
+
+## Features
+
+🔧 **SOAP Web Service Testing**
+- Test SAP RFC/SOAP services directly
+- Full request/response viewing
+- Real-time validation
+
+📍 **Geocoding Integration**
+- Convert addresses to coordinates
+- PC Miler API integration
+- Automatic coordinate population
+
+💾 **Resource Management**
+- Save frequently used resources
+- Quick selection from dropdown
+- Persistent storage (browser localStorage)
+
+🔐 **Secure Credentials**
+- Save credentials locally
+- Never sent to external services
+- One-click clear option
+
+⚙️ **Customizable**
+- Change SAP endpoints
+- Custom PC Miler API key
+- Multiple position support
+
+---
+
+## System Requirements
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **OS** | Windows 7 | Windows 10/11 |
+| **RAM** | 512 MB | 2 GB |
+| **Disk Space** | 500 MB | 1 GB |
+| **Node.js** | 12.x | 18.x or 20.x LTS |
+| **Browser** | Any modern browser | Chrome/Edge/Firefox |
+
+---
+
+## Usage Example
+
+1. **Add a Resource**
+   - Go to "📦 Saved Resources"
+   - Enter Resource ID: `005056043C401EEBA0CAB30F10DB978E`
+   - Enter Resource Name: `TM2FTL-00`
+   - Click "💾 Save New Resource"
+
+2. **Create a Position**
+   - Select resource from dropdown
+   - Enter address: "123 Main St, New York, NY, US"
+   - Click "Get Coordinates from Address"
+   - Latitude/Longitude auto-populate
+
+3. **Send to SAP**
+   - Fill in SAP credentials (if not saved)
+   - Click "Send Request"
+   - View response
+
+---
+
+## Support
+
+For issues or questions:
+- Check the troubleshooting section above
+- Review WINDOWS_INSTALLATION.md for detailed help
+- Check the browser console (F12) for error messages
+
+---
+
+## Version History
+
+**v1.0.0** (Current)
+- Initial release
+- Windows batch/PowerShell launchers
+- Full SOAP client functionality
+- PC Miler geocoding
+- Resource management
+- Credential persistence
+
+---
+
+## License
+
+MIT License - Feel free to use and modify
+
+---
+
+**Ready to get started? Double-click `start.bat` or `start.ps1`!**

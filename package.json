@@ -1,0 +1,43 @@
+{
+  "name": "sap-soap-client",
+  "version": "1.0.0",
+  "description": "SAP SOAP Web Service Client - /SCMTMS/RES_POSITION_UPDATE Tester",
+  "main": "server.js",
+  "bin": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "pkg . --targets node18-win-x64 --compress=Brotli --output SAP_SOAP_Client.exe"
+  },
+  "pkg": {
+    "assets": [
+      "index.html",
+      "nginx.conf"
+    ],
+    "scripts": [
+      "server.js"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
+  },
+  "keywords": [
+    "sap",
+    "soap",
+    "web-service",
+    "rfc",
+    "scmtms"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

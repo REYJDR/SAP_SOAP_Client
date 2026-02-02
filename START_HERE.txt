@@ -1,0 +1,147 @@
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║             🔧 SAP SOAP Client - Windows Edition 🔧            ║
+║                                                                ║
+║                    QUICK START GUIDE                           ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+
+📋 STEP 1: CHOOSE YOUR LAUNCH METHOD
+═══════════════════════════════════════════════════════════════
+
+  Option 0 - Standalone EXE (No installation needed)
+  ─────────────────────────────────────────────────────
+  ✓ If your package includes: SAP_SOAP_Client.exe
+  ✓ No Node.js installation required
+  ✓ Continue to Step 2
+
+  Option 1 - Install Node.js (if no EXE)
+  ─────────────────────────────────────────────────────
+  ✓ Go to: https://nodejs.org/
+  ✓ Download: LTS version (18.x or 20.x)
+  ✓ Run the installer
+  ✓ Restart your computer
+
+
+🚀 STEP 2: RUN THE APPLICATION
+═══════════════════════════════════════════════════════════════
+
+  Choose ONE option:
+
+  Option A - PowerShell (Recommended for Windows 10/11)
+  ─────────────────────────────────────────────────────
+  → Right-click: start.ps1
+  → Select: "Run with PowerShell"
+  → If error about policy, run in Admin PowerShell:
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  → Then double-click start.ps1 again
+
+
+  Option B - Batch File (Works on all Windows versions)
+  ──────────────────────────────────────────────────────
+  → Double-click: start.bat
+  → Wait for it to complete
+  → Your browser will open automatically
+
+
+  Option C - Manual (Advanced Users)
+  ──────────────────────────────────
+  → Open Command Prompt
+  → Type: npm install
+  → Then: npm start
+  → Open: http://localhost:3000
+
+
+⏳ FIRST RUN TAKES 1-2 MINUTES (Node.js mode only)
+═══════════════════════════════════════════════════════════════
+
+  The script will:
+  • Check for Node.js ✓ (skipped in EXE mode)
+  • Install dependencies ✓ (skipped in EXE mode)
+  • Start the server ✓
+  • Open your browser ✓
+
+
+💻 BROWSER WILL OPEN TO: http://localhost:3000
+═══════════════════════════════════════════════════════════════
+
+  If browser doesn't open:
+  → Manually visit: http://localhost:3000
+  → Or check the console for the actual port
+
+
+📁 FILE GUIDE
+═══════════════════════════════════════════════════════════════
+
+  start.ps1                  ← PowerShell launcher (Windows 10/11)
+  start.bat                  ← Batch launcher (all Windows versions)
+  
+  WINDOWS_QUICKSTART.txt     ← This quick start guide
+  WINDOWS_INSTALLATION.md    ← Detailed installation guide
+  
+  index.html                 ← The web interface
+  server.js                  ← Backend server
+  package.json               ← Configuration & dependencies
+
+
+🔧 FEATURES
+═══════════════════════════════════════════════════════════════
+
+  ✅ SOAP Web Service Testing
+  ✅ PC Miler Geocoding (Address → Coordinates)
+  ✅ Saved Resources Management
+  ✅ Secure Credential Storage
+  ✅ Real-time Response Viewing
+  ✅ Multiple Position Support
+
+
+⚙️ INITIAL CONFIGURATION
+═══════════════════════════════════════════════════════════════
+
+  1. Expand "Configuration" section
+  
+  2. Enter SAP Details:
+     • SAP System URL
+     • Username
+     • Password
+     • Click "Save Credentials"
+  
+  3. Configure PC Miler (Optional):
+     • PC Miler API Key
+     • API Endpoint (pre-filled)
+     • Click "Save PC Miler Config"
+
+
+🆘 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+  Problem: "Node.js is not installed"
+  Fix: Use the standalone package with SAP_SOAP_Client.exe, or install Node.js
+
+  Problem: PowerShell execution error
+  Fix: In PowerShell as Admin, run:
+       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+  Problem: Port 3000 is in use
+  Fix: Script will auto-use 3001, 3002, etc.
+
+  Problem: Browser doesn't auto-open
+  Fix: Manually visit http://localhost:3000
+
+  For more help, see: WINDOWS_INSTALLATION.md
+
+
+📞 NEED HELP?
+═══════════════════════════════════════════════════════════════
+
+  1. Read WINDOWS_INSTALLATION.md (detailed guide)
+  2. Check browser console (Press F12)
+  3. Check command line/PowerShell output
+
+
+═══════════════════════════════════════════════════════════════
+
+              👉 Ready? Double-click start.ps1 or start.bat 👈
+
+═══════════════════════════════════════════════════════════════
