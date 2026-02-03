@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPS Transmitter</title>
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -241,12 +243,72 @@
         #send-location:hover {
             background-color: #45a049;
         }
+        #mapContainer {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .map-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        .location-ping {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(66, 133, 244, 0.5);
+            border: 2px solid #4285F4;
+            animation: ping-animation 1.5s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        @keyframes ping-animation {
+            0% {
+                width: 10px;
+                height: 10px;
+                opacity: 1;
+            }
+            50% {
+                width: 80px;
+                height: 80px;
+                opacity: 0.6;
+            }
+            100% {
+                width: 120px;
+                height: 120px;
+                opacity: 0;
+            }
+        }
+        @keyframes marker-bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            25% {
+                transform: translateY(-20px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            75% {
+                transform: translateY(-15px);
+            }
+        }
+        .custom-truck-marker {
+            transition: transform 0.3s ease;
+        }
+        .custom-truck-marker:hover {
+            transform: scale(1.2);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>� GPS Transmitter</h1>
+            <h1>🌐 GPS Transmitter</h1>
             <p>/SCMTMS/RES_POSITION_UPDATE - Web Service Tester</p>
         </div>
         
@@ -289,7 +351,7 @@
 
                     <div class="form-group">
                         <label>PC Miler API Key *</label>
-                        <input type="text" id="pcmilerApiKey" type="password" placeholder="91F47AE69A97614985E5BE2CBC1547BD">
+                        <input  id="pcmilerApiKey" type="password" placeholder="91F47AE69A97614985E5BE2CBC1547BD">
                     </div>
 
                     <div class="form-group">
@@ -303,7 +365,7 @@
                 </div>
 
                 <div class="section-header" onclick="toggleSection('resources-section', this)">
-                    <h2>📦 Saved Resources</h2>
+                    <h2>🚛 Saved TRUCK Resources</h2>
                     <button class="collapse-toggle" onclick="event.stopPropagation()">▼</button>
                 </div>
 
@@ -325,41 +387,64 @@
                                 <input type="text" id="newResourceName" placeholder="TM2FTL-00" maxlength="40">
                             </div>
                         </div>
-                        <button class="add-row-btn" style="background: #28a745;" onclick="addNewResource()">💾 Save New Resource</button>
+                        <button class="add-row-btn" style="background: #28a745;" onclick="addNewResource()">💾 Save </button>
                     </div>
 
                     <div class="form-group">
                         <label>Manage Saved Resources</label>
-                        <select id="manageSavedResourcesSelect" style="width: 100%; margin-bottom: 10px;">
-                            <option value="">-- Choose a resource to delete --</option>
-                        </select>
-                        <button class="btn-secondary" onclick="deleteManageResource()" style="width: 100%;">Delete Selected Resource</button>
+                        <div style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+                            <table id="resourcesTable" style="width: 100%; border-collapse: collapse;">
+                                <thead style="background: #f5f5f5; border-bottom: 2px solid #667eea;">
+                                    <tr>
+                                        <th style="padding: 10px; text-align: left; font-weight: 600; color: #333;">Resource Name</th>
+                                        <th style="padding: 10px; text-align: left; font-weight: 600; color: #333;">Resource ID</th>
+                                        <th style="padding: 10px; text-align: center; font-weight: 600; color: #333; width: 80px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resourcesTableBody">
+                                    <tr>
+                                        <td colspan="3" style="padding: 20px; text-align: center; color: #999;">No saved resources yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <h2 style="margin-top: 20px; font-size: 18px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px;">Position Data</h2>
+                <h2 style="margin-top: 20px; font-size: 18px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px;"> 📍 Truck Position</h2>
 
                 <div id="positionsList"></div>
 
                 <button class="add-row-btn" onclick="addPositionRow()">+ Add Position</button>
 
                 <div class="button-group" style="margin-top: 30px;">
-                    <button class="btn-primary" onclick="sendSoapRequest()">Send Request</button>
+                    <button class="btn-primary" onclick="sendSoapRequest()">Send to SAP</button>
                     <button class="btn-secondary" onclick="clearForm()">Clear All</button>
                 </div>
             </div>
 
             <!-- Right Column: Response -->
             <div class="response-section">
-                <h2>Response</h2>
+                <h2>SAP WS Response</h2>
                 <div id="statusIndicator" style="display:none;" class="status-indicator status-pending">Waiting for response...</div>
                 <div id="responseContent" class="response-content">Ready to send request...</div>
             </div>
         </div>
 
+        <!-- Map Section - Full Width -->
+        <div style="padding: 0 30px 30px 30px;">
+            <div class="map-section">
+                <h2 style="font-size: 18px; color: #333; margin-bottom: 15px;">📍 Truck Location Map</h2>
+                <div id="mapContainer"></div>
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    <p>🔵 Blue markers = Truck positions | 📌 Right-click to set position</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Debug Section for Geocoding -->
         <div style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 10px; border: 2px solid #ddd;">
-            <h2 style="font-size: 16px; margin-bottom: 15px; color: #333;">🔍 Geocoding Debug Info</h2>
+            <h2 style="font-size: 16px; margin-bottom: 15px; color: #333;">🔍 Geocoding Debug Info - GIS PROVIDER</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <h3 style="font-size: 13px; margin-bottom: 10px; color: #666;">API Request URL</h3>
@@ -373,6 +458,228 @@
         </div>
     </div>
 
+    <!-- Leaflet Map JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Map variables
+        let map;
+        let markers = [];
+
+        // Initialize map
+        function initializeMap() {
+            if (map) return; // Already initialized
+
+            const mapContainer = document.getElementById('mapContainer');
+            if (!mapContainer) {
+                console.error('Map container not found');
+                return;
+            }
+
+            console.log('Initializing map...');
+            map = L.map('mapContainer').setView([39.8283, -98.5795], 4); // Center of USA
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Invalidate size to ensure proper rendering
+            setTimeout(() => {
+                map.invalidateSize();
+                console.log('Map initialized successfully');
+            }, 100);
+
+            // Right-click to add position
+            map.on('contextmenu', function(e) {
+                addPositionFromMap(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function addMarker(lat, lng, resourceName, resourceId, shouldBounce = false) {
+            // Create custom truck icon
+            const truckIcon = L.divIcon({
+                className: 'custom-truck-marker',
+                html: `<div style="
+                    font-size: 32px;
+                    text-align: center;
+                    line-height: 1;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                ">🚛</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+
+            const marker = L.marker([lat, lng], { 
+                icon: truckIcon,
+                riseOnHover: true
+            }).addTo(map);
+
+            // Add bounce animation if requested
+            if (shouldBounce) {
+                // Wait for marker to be fully rendered in DOM
+                setTimeout(() => {
+                    const element = marker.getElement();
+                    if (element) {
+                        element.style.animation = 'marker-bounce 0.6s ease-out';
+                        console.log('Bounce animation applied to marker at', lat, lng);
+                        
+                        // Remove animation after it completes to allow re-animation
+                        setTimeout(() => {
+                            element.style.animation = '';
+                        }, 600);
+                    } else {
+                        console.log('Could not find marker element for bounce animation');
+                    }
+                }, 200);
+            }
+
+            marker.bindPopup(`<b>🚛 ${resourceName || 'Truck'}</b><br>Lat: ${lat.toFixed(4)}<br>Lng: ${lng.toFixed(4)}<br>ID: ${resourceId || 'N/A'}`);
+            markers.push({ marker, lat, lng });
+            
+            return marker;
+        }
+
+        function showPingAnimation(lat, lng) {
+            if (!map) return;
+
+            // Create a pulsing circle effect at the location
+            const pingCircle = L.circle([lat, lng], {
+                radius: 50,
+                color: '#4285F4',
+                fillColor: '#4285F4',
+                fillOpacity: 0.3,
+                weight: 2
+            }).addTo(map);
+
+            // Animate the circle pulse
+            let pulseCount = 0;
+            const maxPulses = 2;
+            let expanding = true;
+            let radius = 50;
+            
+            const interval = setInterval(() => {
+                if (expanding) {
+                    radius += 20;
+                    if (radius >= 200) {
+                        expanding = false;
+                        pulseCount++;
+                    }
+                } else {
+                    radius -= 20;
+                    if (radius <= 50) {
+                        expanding = true;
+                        if (pulseCount >= maxPulses) {
+                            clearInterval(interval);
+                            map.removeLayer(pingCircle);
+                            return;
+                        }
+                    }
+                }
+                
+                const opacity = 1 - (radius / 300);
+                pingCircle.setRadius(radius);
+                pingCircle.setStyle({
+                    fillOpacity: opacity * 0.4,
+                    opacity: opacity * 0.8
+                });
+            }, 50);
+        }
+
+        function updateMapMarkers() {
+            if (!map) return;
+
+            // Clear existing markers
+            markers.forEach(m => map.removeLayer(m.marker));
+            markers = [];
+
+            // Add markers from position list
+            const positionRows = document.querySelectorAll('[id^="pos_"]');
+            positionRows.forEach(row => {
+                const latInput = row.querySelector('.latitude');
+                const lngInput = row.querySelector('.longitude');
+                const resourceNameInput = row.querySelector('.resource-name');
+                const resourceIdInput = row.querySelector('.resource-id');
+
+                const lat = parseFloat(latInput?.value);
+                const lng = parseFloat(lngInput?.value);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    addMarker(lat, lng, resourceNameInput?.value, resourceIdInput?.value);
+                }
+            });
+
+            // Fit map to markers if any exist
+            if (markers.length > 0) {
+                const bounds = L.latLngBounds(markers.map(m => [m.lat, m.lng]));
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        function updateMapMarkersWithBounce(targetLat, targetLng) {
+            if (!map) return;
+
+            console.log('updateMapMarkersWithBounce called for', targetLat, targetLng);
+
+            // Clear existing markers
+            markers.forEach(m => map.removeLayer(m.marker));
+            markers = [];
+
+            // Add markers from position list
+            const positionRows = document.querySelectorAll('[id^="pos_"]');
+            console.log('Found', positionRows.length, 'position rows');
+            positionRows.forEach(row => {
+                const latInput = row.querySelector('.latitude');
+                const lngInput = row.querySelector('.longitude');
+                const resourceNameInput = row.querySelector('.resource-name');
+                const resourceIdInput = row.querySelector('.resource-id');
+
+                const lat = parseFloat(latInput?.value);
+                const lng = parseFloat(lngInput?.value);
+
+                console.log(`Found position: lat=${lat}, lng=${lng}`);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Check if this is the target marker to bounce
+                    const shouldBounce = Math.abs(lat - targetLat) < 0.0001 && Math.abs(lng - targetLng) < 0.0001;
+                    console.log(`Marker at ${lat}, ${lng} - shouldBounce: ${shouldBounce}`);
+                    addMarker(lat, lng, resourceNameInput?.value, resourceIdInput?.value, shouldBounce);
+                }
+            });
+        }
+
+        function addPositionFromMap(lat, lng) {
+            // Find last position row and populate it, or add new one
+            const positions = document.querySelectorAll('[id^="pos_"]');
+            const lastPosition = positions[positions.length - 1];
+
+            if (lastPosition) {
+                const latInput = lastPosition.querySelector('.latitude');
+                const lngInput = lastPosition.querySelector('.longitude');
+
+                if (latInput && lngInput) {
+                    if (!latInput.value && !lngInput.value) {
+                        latInput.value = lat.toFixed(6);
+                        lngInput.value = lng.toFixed(6);
+                        updateMapMarkers();
+                        return;
+                    }
+                }
+            }
+
+            // Add new position
+            addPositionRow();
+            const newPositions = document.querySelectorAll('[id^="pos_"]');
+            const newPosition = newPositions[newPositions.length - 1];
+            const latInput = newPosition.querySelector('.latitude');
+            const lngInput = newPosition.querySelector('.longitude');
+
+            latInput.value = lat.toFixed(6);
+            lngInput.value = lng.toFixed(6);
+            updateMapMarkers();
+        }
+    </script>
+
     <script>
         // Initialize with one empty position row and load saved credentials
         window.addEventListener('load', async () => {
@@ -380,6 +687,8 @@
             await loadCredentials();
             loadPcMilerConfig();
             loadSavedResourcesList();
+            console.log('Window load event - initializing map');
+            setTimeout(initializeMap, 1000); // Initialize map after DOM is ready with longer delay
         });
 
         function toggleSection(sectionId, headerElement) {
@@ -393,22 +702,228 @@
         // Saved Resources Functions
         function loadSavedResourcesList() {
             const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
-            const select = document.getElementById('manageSavedResourcesSelect');
+            const tableBody = document.getElementById('resourcesTableBody');
             
-            // Clear existing options except the first one
-            select.innerHTML = '<option value="">-- Choose a resource to delete --</option>';
+            // Clear existing rows
+            tableBody.innerHTML = '';
             
-            savedResources.forEach((resource, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${resource.resourceName} (${resource.resourceId})`;
-                select.appendChild(option);
-            });
+            if (savedResources.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="padding: 20px; text-align: center; color: #999;">No saved resources yet</td></tr>';
+            } else {
+                savedResources.forEach((resource, index) => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid #eee';
+                    row.style.transition = 'background-color 0.2s';
+                    row.onmouseover = function() { this.style.backgroundColor = '#f9f9f9'; };
+                    row.onmouseout = function() { this.style.backgroundColor = 'white'; };
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; color: #333; font-weight: 500;">${resource.resourceName}</td>
+                        <td style="padding: 12px; color: #666; font-size: 12px; font-family: monospace; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${resource.resourceId}">${resource.resourceId}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button onclick="deleteResourceByIndex(${index})" style="
+                                background: #dc3545;
+                                color: white;
+                                border: none;
+                                padding: 6px 10px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 12px;
+                                transition: background 0.2s;
+                            " onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                                Delete
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
             
             // Also update all position dropdowns
             document.querySelectorAll('.saved-resource-select').forEach(dropdown => {
                 populateResourceDropdownElement(dropdown);
             });
+        }
+
+        function deleteResourceByIndex(index) {
+            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
+            const resource = savedResources[index];
+            
+            if (!confirm(`Delete resource "${resource.resourceName}"?`)) {
+                return;
+            }
+            
+            savedResources.splice(index, 1);
+            localStorage.setItem('savedResources', JSON.stringify(savedResources));
+            
+            loadSavedResourcesList();
+            alert('✓ Resource deleted successfully!');
+        }
+
+        // Saved Positions Functions
+        function saveCurrentPosition() {
+            const positionName = document.getElementById('newPositionName').value.trim();
+            
+            if (!positionName) {
+                alert('Please enter a position name');
+                return;
+            }
+            
+            // Get current position data from the first position row
+            const positionRows = document.querySelectorAll('[id^="pos_"]');
+            if (positionRows.length === 0) {
+                alert('No position data to save');
+                return;
+            }
+            
+            const firstRow = positionRows[0];
+            const resourceId = firstRow.querySelector('.resource-id').value.trim();
+            const resourceName = firstRow.querySelector('.resource-name').value.trim();
+            const latitude = firstRow.querySelector('.latitude').value.trim();
+            const longitude = firstRow.querySelector('.longitude').value.trim();
+            const street = firstRow.querySelector('.address-street').value.trim();
+            const city = firstRow.querySelector('.address-city').value.trim();
+            const state = firstRow.querySelector('.address-state').value.trim();
+            const postcode = firstRow.querySelector('.address-postcode').value.trim();
+            const country = firstRow.querySelector('.address-country').value.trim();
+            
+            if (!latitude || !longitude) {
+                alert('Please ensure latitude and longitude are filled');
+                return;
+            }
+            
+            const positionData = {
+                name: positionName,
+                resourceId,
+                resourceName,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
+                address: { street, city, state, postcode, country }
+            };
+            
+            const savedPositions = JSON.parse(localStorage.getItem('savedPositions') || '[]');
+            savedPositions.push(positionData);
+            localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+            
+            document.getElementById('newPositionName').value = '';
+            loadSavedPositionsList();
+            alert(`✓ Position "${positionName}" saved successfully!`);
+        }
+
+        function loadSavedPositionsList() {
+            const savedPositions = JSON.parse(localStorage.getItem('savedPositions') || '[]');
+            const tableBody = document.getElementById('savedPositionsTableBody');
+            
+            tableBody.innerHTML = '';
+            
+            if (savedPositions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="padding: 20px; text-align: center; color: #999;">No saved positions yet</td></tr>';
+            } else {
+                savedPositions.forEach((position, index) => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid #eee';
+                    row.style.transition = 'background-color 0.2s';
+                    row.onmouseover = function() { this.style.backgroundColor = '#f9f9f9'; };
+                    row.onmouseout = function() { this.style.backgroundColor = 'white'; };
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px; color: #333; font-weight: 500;">${position.name}</td>
+                        <td style="padding: 12px; color: #666; font-size: 12px;">
+                            ${position.latitude.toFixed(4)}, ${position.longitude.toFixed(4)}
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button onclick="loadSavedPosition(${index})" style="
+                                background: #4285F4;
+                                color: white;
+                                border: none;
+                                padding: 6px 10px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 12px;
+                                margin-right: 5px;
+                                transition: background 0.2s;
+                            " onmouseover="this.style.background='#3367D6'" onmouseout="this.style.background='#4285F4'">
+                                Load
+                            </button>
+                            <button onclick="deletePositionByIndex(${index})" style="
+                                background: #dc3545;
+                                color: white;
+                                border: none;
+                                padding: 6px 10px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 12px;
+                                transition: background 0.2s;
+                            " onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                                Delete
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        function loadSavedPosition(index) {
+            const savedPositions = JSON.parse(localStorage.getItem('savedPositions') || '[]');
+            const position = savedPositions[index];
+            
+            if (!position) {
+                alert('Position not found');
+                return;
+            }
+            
+            // Get or create first position row
+            let positionRows = document.querySelectorAll('[id^="pos_"]');
+            if (positionRows.length === 0) {
+                addPositionRow();
+                positionRows = document.querySelectorAll('[id^="pos_"]');
+            }
+            
+            const firstRow = positionRows[0];
+            firstRow.querySelector('.resource-id').value = position.resourceId || '';
+            firstRow.querySelector('.resource-name').value = position.resourceName || '';
+            firstRow.querySelector('.latitude').value = position.latitude;
+            firstRow.querySelector('.longitude').value = position.longitude;
+            firstRow.querySelector('.address-street').value = position.address.street || '';
+            firstRow.querySelector('.address-city').value = position.address.city || '';
+            firstRow.querySelector('.address-state').value = position.address.state || '';
+            firstRow.querySelector('.address-postcode').value = position.address.postcode || '';
+            firstRow.querySelector('.address-country').value = position.address.country || '';
+            
+            // Update map with bounce animation
+            if (map) {
+                map.setView([position.latitude, position.longitude], 13);
+                setTimeout(() => {
+                    showPingAnimation(position.latitude, position.longitude);
+                }, 300);
+                setTimeout(() => {
+                    updateMapMarkersWithBounce(position.latitude, position.longitude);
+                }, 500);
+                setTimeout(() => {
+                    const marker = markers.find(m => Math.abs(m.lat - position.latitude) < 0.0001 && Math.abs(m.lng - position.longitude) < 0.0001);
+                    if (marker) {
+                        marker.marker.openPopup();
+                    }
+                }, 1200);
+            }
+            
+            alert(`✓ Position "${position.name}" loaded!`);
+        }
+
+        function deletePositionByIndex(index) {
+            const savedPositions = JSON.parse(localStorage.getItem('savedPositions') || '[]');
+            const position = savedPositions[index];
+            
+            if (!confirm(`Delete position "${position.name}"?`)) {
+                return;
+            }
+            
+            savedPositions.splice(index, 1);
+            localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+            
+            loadSavedPositionsList();
+            alert('✓ Position deleted successfully!');
         }
 
         function populateResourceDropdown(positionId) {
@@ -480,29 +995,6 @@
             
             loadSavedResourcesList();
             alert(`✓ Resource "${resourceData.resourceName}" saved successfully!`);
-        }
-
-        function deleteManageResource() {
-            const select = document.getElementById('manageSavedResourcesSelect');
-            const index = select.value;
-            
-            if (!index) {
-                alert('Please select a resource to delete');
-                return;
-            }
-            
-            const savedResources = JSON.parse(localStorage.getItem('savedResources') || '[]');
-            const resource = savedResources[index];
-            
-            if (!confirm(`Delete resource "${resource.resourceName}"?`)) {
-                return;
-            }
-            
-            savedResources.splice(index, 1);
-            localStorage.setItem('savedResources', JSON.stringify(savedResources));
-            
-            loadSavedResourcesList();
-            alert('✓ Resource deleted successfully!');
         }
 
         async function saveCredentials() {
@@ -699,12 +1191,18 @@
             
             // Update timestamp to current time
             updateTimestamp(rowId);
+
+            // Add event listeners to update map when coordinates change
+            const positionItem = document.getElementById(rowId);
+            positionItem.querySelector('.longitude').addEventListener('change', updateMapMarkers);
+            positionItem.querySelector('.latitude').addEventListener('change', updateMapMarkers);
         }
 
         function removePosition(rowId) {
             const element = document.getElementById(rowId);
             if (document.querySelectorAll('.position-item').length > 1) {
                 element.remove();
+                updateMapMarkers();
             } else {
                 alert('At least one position is required');
             }
@@ -796,6 +1294,31 @@
                     
                     positionItem.querySelector('.latitude').value = lat;
                     positionItem.querySelector('.longitude').value = lon;
+                    
+                    // Pan and zoom map to the new location first
+                    if (map) {
+                        map.setView([lat, lon], 13);
+                        
+                        // Show ping animation
+                        setTimeout(() => {
+                            showPingAnimation(lat, lon);
+                        }, 300);
+                        
+                        // Update markers with bounce animation
+                        setTimeout(() => {
+                            updateMapMarkersWithBounce(lat, lon);
+                        }, 500);
+                        
+                        // Open the popup for this marker
+                        setTimeout(() => {
+                            const marker = markers.find(m => Math.abs(m.lat - lat) < 0.0001 && Math.abs(m.lng - lon) < 0.0001);
+                            if (marker) {
+                                marker.marker.openPopup();
+                            }
+                        }, 1200);
+                    }
+                    
+                    alert(`✓ Location found!\nLatitude: ${lat}\nLongitude: ${lon}\nAddress: ${location.Address.StreetAddress}, ${location.Address.City}, ${location.Address.State}`);
                     console.log(`✓ Location found! Latitude: ${lat}, Longitude: ${lon}, Address: ${location.Address.StreetAddress}, ${location.Address.City}, ${location.Address.State}`);
                 } else if (result && result.Locations && result.Locations.length > 0) {
                     // Handle legacy response format
@@ -805,6 +1328,27 @@
                     
                     positionItem.querySelector('.latitude').value = lat;
                     positionItem.querySelector('.longitude').value = lon;
+                    
+                    // Pan and zoom map to the new location
+                    if (map) {
+                        map.setView([lat, lon], 13);
+                        
+                        setTimeout(() => {
+                            showPingAnimation(lat, lon);
+                        }, 300);
+                        
+                        setTimeout(() => {
+                            updateMapMarkersWithBounce(lat, lon);
+                        }, 500);
+                        
+                        setTimeout(() => {
+                            const marker = markers.find(m => Math.abs(m.lat - lat) < 0.0001 && Math.abs(m.lng - lon) < 0.0001);
+                            if (marker) {
+                                marker.marker.openPopup();
+                            }
+                        }, 1200);
+                    }
+                    
                     alert(`✓ Location found!\nLatitude: ${lat}\nLongitude: ${lon}`);
                 } else {
                     alert('Address not found. Please verify the address details.');
