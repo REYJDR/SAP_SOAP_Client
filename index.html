@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP SOAP Client - RES_POSITION_UPDATE</title>
+    <title>GPS Transmitter</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -246,7 +246,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔧 SAP SOAP Client</h1>
+            <h1>� GPS Transmitter</h1>
             <p>/SCMTMS/RES_POSITION_UPDATE - Web Service Tester</p>
         </div>
         
@@ -254,7 +254,7 @@
             <!-- Left Column: Input Form -->
             <div class="form-section">
                 <div class="section-header" onclick="toggleSection('config-section', this)">
-                    <h2>Configuration</h2>
+                    <h2>SAP SOAP Configuration</h2>
                     <button class="collapse-toggle" onclick="event.stopPropagation()">▼</button>
                 </div>
                 
@@ -284,12 +284,12 @@
                     </div>
 
                     <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-
-                    <h3 style="font-size: 14px; margin-bottom: 15px; color: #333;">🌐 PC Miler API Configuration</h3>
+ 
+                    <h3 style="font-size: 14px; margin-bottom: 15px; color: #333;">🌐 GIS PROVIDER -> PC Miler API Configuration</h3>
 
                     <div class="form-group">
                         <label>PC Miler API Key *</label>
-                        <input type="text" id="pcmilerApiKey" placeholder="91F47AE69A97614985E5BE2CBC1547BD">
+                        <input type="text" id="pcmilerApiKey" type="password" placeholder="91F47AE69A97614985E5BE2CBC1547BD">
                     </div>
 
                     <div class="form-group">
