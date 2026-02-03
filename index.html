@@ -351,7 +351,7 @@
 
                     <div class="form-group">
                         <label>PC Miler API Key *</label>
-                        <input  id="pcmilerApiKey" type="password" placeholder="91F47AE69A97614985E5BE2CBC1547BD">
+                        <input  id="pcmilerApiKey" type="password" placeholder="Your PC Miler API Key" value>
                     </div>
 
                     <div class="form-group">
@@ -1223,8 +1223,8 @@
             const postcode = positionItem.querySelector('.address-postcode').value.trim();
             const country = positionItem.querySelector('.address-country').value.trim() || 'US';
             
-            if (!street || !city || !state) {
-                alert('Please enter at least: Street, City, and State');
+            if (!street || !city) {
+                alert('Please enter at least: Street and City');
                 return;
             }
 
@@ -1234,18 +1234,38 @@
                 const apiKey = config.apiKey;
                 const endpoint = config.endpoint;
                 
+                // Determine region based on country
+                let region = 'NA'; // Default to North America
+                const countryCode = country.toUpperCase();
+                
+                if (['DE', 'FR', 'GB', 'IT', 'ES', 'NL', 'BE', 'AT', 'CH', 'PL', 'SE', 'DK', 'NO', 'FI'].includes(countryCode)) {
+                    region = 'EU'; // Europe
+                } else if (['CA', 'MX'].includes(countryCode)) {
+                    region = 'NA'; // North America
+                } else if (['AU', 'NZ'].includes(countryCode)) {
+                    region = 'APAC'; // Asia Pacific
+                }
+                
                 const params = new URLSearchParams({
                     street: street,
                     city: city,
-                    state: state,
                     country: country,
-                    postcode: postcode,
-                    region: 'NA',
+                    region: region,
                     dataset: 'Current'
                 });
                 
+                // Add state only if provided (mainly for US/CA)
+                if (state) {
+                    params.append('state', state);
+                }
+                
+                // Add postcode if provided
+                if (postcode) {
+                    params.append('postcode', postcode);
+                }
+                
                 // Only add postcodeFilter for US addresses
-                if (country.toLowerCase() === 'us') {
+                if (countryCode === 'US') {
                     params.append('postcodeFilter', 'us');
                 }
 
@@ -1256,6 +1276,7 @@
                 document.getElementById('debugResponse').textContent = 'Loading...';
                 
                 console.log('Geocoding request URL:', url);
+                console.log('Country:', country, 'Region:', region);
                 console.log('Using PC Miler API Key:', apiKey.substring(0, 8) + '...');
                 
                 const response = await fetch(url, {
